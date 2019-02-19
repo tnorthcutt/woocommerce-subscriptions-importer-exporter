@@ -334,7 +334,65 @@ class WCS_Importer {
 						}
 					}
 
+					// add order
+					$new_order_product_id = $data[ self::$fields['product_id'] ];
+					$new_order_product    = wc_get_product( $new_order_product_id );
+					$order                = wc_create_order( array(
+						'customer_id' => $user_id,
+						'post_date'   => '1994-10-13 9:00:00',
+						'order_date'  => '1994-10-13 9:00:00'
+					) );
+
+					$order->add_product( $new_order_product, 1 );
+
+					$billing_address  = array(
+						'first_name' => $data['billing_first_name'],
+						'last_name'  => $data['billing_last_name'],
+						'company'    => '',
+						'email'      => $data['billing_email'],
+						'phone'      => $data['billing_phone'],
+						'address_1'  => $data['billing_address_1'],
+						'address_2'  => $data['billing_address_2'],
+						'city'       => $data['billing_city'],
+						'state'      => $data['billing_state'],
+						'postcode'   => $data['billing_postcode'],
+						'country'    => $data['billing_country'],
+					);
+
+					$shipping_address = array(
+						'first_name' => $data['shipping_first_name'],
+						'last_name'  => $data['shipping_last_name'],
+						'company'    => '',
+						'phone'      => $data['shipping_phone'],
+						'address_1'  => $data['shipping_address_1'],
+						'address_2'  => $data['shipping_address_2'],
+						'city'       => $data['shipping_city'],
+						'state'      => $data['shipping_state'],
+						'postcode'   => $data['shipping_postcode'],
+						'country'    => $data['shipping_country'],
+					);
+
+					$order->set_address( $billing_address, 'billing' );
+					$order->set_address( $shipping_address, 'shipping' );
+					$shipping = new WC_Order_Item_Shipping();
+					$shipping->set_method_id( 'free_shipping' );
+					$shipping->set_method_title( 'Free Shipping' );
+					$shipping->set_total( 0 );
+					$order->add_item( $shipping );
+					$order->calculate_totals();
+					$order->update_status( "completed", 'Imported order', true );
+					$the_order_id = $order->get_id();
+
+					//Update the order date to be the last payment date
+					wp_update_post( array(
+						'ID'            => $the_order_id,
+						'post_date'     => $data['last_payment_date'],
+						'post_date_gmt' => $data['last_payment_date']
+					) );
+
+
 					$subscription = wcs_create_subscription( array(
+							'order_id'         => $order->get_id(),
 							'customer_id'      => $user_id,
 							'start_date'       => $dates_to_update['start'],
 							'billing_interval' => ( ! empty( $data[ self::$fields['billing_interval'] ] ) ) ? $data[ self::$fields['billing_interval'] ] : 1,

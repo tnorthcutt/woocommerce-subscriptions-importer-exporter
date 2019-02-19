@@ -396,6 +396,7 @@ class WCS_Import_Admin {
 									<option value="custom_user_post_meta">custom_user_post_meta</option>
 									<option value="custom_user_meta">custom_user_meta</option>
 									<option value="custom_post_meta">custom_post_meta</option>
+                                    <option value="product_id">product_id</option>
 								</optgroup>
 							</select>
 						</td>
@@ -500,6 +501,7 @@ class WCS_Import_Admin {
 			'requires_manual_renewal'  => '',
 			'billing_period'           => '',
 			'billing_interval'         => '',
+			'product_id'               => '',
 		);
 
 		$mapping_rules = $_POST['mapto'];
